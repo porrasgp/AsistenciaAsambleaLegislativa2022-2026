@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Asistencia Legislativa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="dashboard-header text-center">
+        <h1><i class="fas fa-tachometer-alt"></i> Dashboard de Asistencia Legislativa</h1>
+        <p>Monitoreo de la participación de diputados en sesiones legislativas</p>
+        <div class="d-flex justify-content-end me-3">
+            <small><i class="fas fa-sync-alt"></i> Última actualización: <span id="last-updated">--:--:--</span></small>
+        </div>
+    </header>
+
+    <div class="container" id="loading">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p>Cargando datos de asistencia legislativa...</p>
+    </div>
+
+    <div class="container" id="dashboard-content" style="display: none;">
+        <div class="refresh-controls">
+            <div class="time-filter">
+                <div class="time-filter-btn active" data-range="7">7 días</div>
+                <div class="time-filter-btn" data-range="30">30 días</div>
+                <div class="time-filter-btn" data-range="90">90 días</div>
+                <div class="time-filter-btn" data-range="year">Año actual</div>
+            </div>
+            <button id="refresh-btn" class="btn btn-primary w-100"><i class="fas fa-sync-alt me-2"></i>Actualizar Datos</button>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card h-100">
+                    <div class="card-header">Asistencia Global</div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-users stat-icon"></i>
+                        <div class="stat-value" id="global-attendance">0.0%</div>
+                        <div class="kpi-badge excellent">Excelente</div>
+                        <small>Todos los diputados</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card h-100">
+                    <div class="card-header">Asistencia Mensual</div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar-alt stat-icon"></i>
+                        <div class="stat-value" id="monthly-attendance">0.0%</div>
+                        <div class="kpi-badge good">Buena</div>
+                        <small>Promedio del mes actual</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card h-100">
+                    <div class="card-header">Mejor Diputado</div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-trophy stat-icon"></i>
+                        <div class="stat-value" id="top-deputy-attendance">0.0%</div>
+                        <div class="kpi-badge excellent">Excelente</div>
+                        <small id="top-deputy-name">Cargando...</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card h-100">
+                    <div class="card-header">Peor Diputado</div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-exclamation-triangle stat-icon"></i>
+                        <div class="stat-value" id="bottom-deputy-attendance">0.0%</div>
+                        <div class="kpi-badge critical">Crítico</div>
+                        <small id="bottom-deputy-name">Cargando...</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-4">
+            <div class="col-md-6">
+                <div class="chart-container h-100">
+                    <div class="chart-title"><i class="fas fa-chart-line"></i> Evolución de Asistencia Mensual</div>
+                    <canvas id="monthly-trend-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="chart-container h-100">
+                    <div class="chart-title"><i class="fas fa-chart-bar"></i> Sesiones por Fracción Política</div>
+                    <canvas id="sessions-by-fraction-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-4">
+            <div class="col-md-6">
+                <div class="chart-container h-100">
+                    <div class="chart-title"><i class="fas fa-chart-area"></i> Asistencia por Fracción Política (Evolución Temporal)</div>
+                    <canvas id="attendance-by-fraction-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="chart-container h-100">
+                    <div class="chart-title"><i class="fas fa-trophy"></i> Top 10 Diputados - Mejor Asistencia</div>
+                    <div id="top-deputies-list">Cargando datos...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-4">
+            <div class="col-md-6">
+                <div class="chart-container h-100">
+                    <div class="chart-title"><i class="fas fa-exclamation-triangle"></i> Top 10 Diputados - Peor Asistencia</div>
+                    <div id="bottom-deputies-list">Cargando datos...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer text-center">
+        <div class="container">
+            <p>Sistema de Monitoreo Legislativo</p>
+            <p>Plataforma para el seguimiento de la participación de diputados en actividades legislativas</p>
+            <p><small>Datos actualizados cada 5 minutos<br>Fuente: Registros oficiales de asistencia</small></p>
+            <p><small>© 2023 Sistema de Transparencia Legislativa</small></p>
+        </div>
+    </footer>
+
+    <script src="Dashboard.js"></script>
+</body>
+</html>
