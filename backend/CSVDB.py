@@ -1,5 +1,6 @@
 import pandas as pd
 import sqlite3
+from unidecode import unidecode
 
 # ===== 1. Cargar archivo Excel =====
 import pandas as pd
@@ -59,6 +60,8 @@ df["fecha"] = pd.to_datetime(
     errors="coerce"
 )
 
+
+df['Diputado'] = df['Diputado'].apply(lambda x: unidecode(x) if isinstance(x, str) else x)
 # ===== 4. Crear conexión a SQLite =====
 conn = sqlite3.connect("./backend/asistencia_legislativa.db")
 
