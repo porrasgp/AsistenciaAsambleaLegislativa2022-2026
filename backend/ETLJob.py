@@ -33,11 +33,19 @@ for file in xlsx_files:
 # Combine DataFrames
 if dfs:
     combined_df = pd.concat(dfs, ignore_index=True)
-
+    
     # Keep only columns 0 to 30 (0–30 = 31 columns)
     combined_df = combined_df.iloc[:, :31]  
-    print(f"✅ Loaded {len(dfs)} files with {combined_df.shape[0]} rows")
+    
+    # Save to Excel
+    output_path = os.path.join(folder_path, "combined_asistencia.xlsx")
+    combined_df.to_excel(output_path, index=False)
+    print(f"✅ Combined {len(dfs)} files with {combined_df.shape[0]} rows")
 
-    # The combined_df exists in memory, not saved to Excel
 else:
     print("⚠ No Excel files found in the folder.")
+    # Keep only columns 0 to 30 (0–30 = 31 columns)
+    #combined_df = combined_df.iloc[:, :31]  
+    #print(f"✅ Loaded {len(dfs)} files with {combined_df.shape[0]} rows")
+
+

@@ -2,11 +2,19 @@ import pandas as pd
 import sqlite3
 
 # ===== 1. Cargar archivo Excel =====
-file_path = "combined_asistencia.xlsx"  # Ajusta ruta si es necesario
-df = pd.read_excel(file_path, sheet_name="Sheet1")
+import pandas as pd
+import os
 
-# Revisar columnas disponibles
-print("Columnas originales:", df.columns.tolist())
+# ===== 1. Cargar archivo Excel =====
+file_path = r"C:\Users\Admin\OneDrive\Desktop\AsistenciaAsambleaLegislativa2022-2026\data\combined_asistencia.xlsx"
+
+# Verify the file exists before trying to read it
+if os.path.exists(file_path):
+    df = pd.read_excel(file_path, sheet_name="Sheet1")
+    print(f"✅ Excel file loaded successfully with {df.shape[0]} rows and {df.shape[1]} columns")
+else:
+    print(f"❌ File not found at: {file_path}")
+    print("Please check the file path and try again.")
 
 # ===== 2. Normalización de columnas =====
 # Ajusta según los nombres de tu archivo real
