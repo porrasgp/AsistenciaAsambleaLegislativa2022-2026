@@ -116,8 +116,13 @@ body {
 .ranking-row {
     display: flex;
     align-items: center;
-    padding: 10px 0;
+    padding: 12px 0;
     border-bottom: 1px solid #eee;
+}
+
+.ranking-container {
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .ranking-position {
@@ -136,7 +141,7 @@ body {
 
 .progress {
     height: 10px;
-    margin-top: 5px;
+    margin-top: 8px;
     background-color: #e9ecef;
     border-radius: 5px;
     overflow: hidden;
@@ -212,4 +217,18 @@ body {
 .spinner-border {
     width: 3rem;
     height: 3rem;
+}
+
+@media (max-width: 768px) {
+    .time-filter {
+        flex-direction: column;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+    }
+    
+    .chart-container {
+        padding: 15px;
+    }
 }

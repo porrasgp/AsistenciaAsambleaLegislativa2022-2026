@@ -46,22 +46,25 @@ async function fetchDashboardData() {
     }
 }
 
-// Process data for charts (unchanged)
+// Process data for charts
 function processDashboardData(rawData) {
     if (!rawData) return null;
 
     const topDeputy = rawData.topDeputies.length > 0 ? rawData.topDeputies[0] : {Diputado: 'N/A', pct_asistencia: 0};
     const bottomDeputy = rawData.worstDeputies.length > 0 ? rawData.worstDeputies[0] : {Diputado: 'N/A', pct_asistencia: 0};
 
+    // Procesar datos mensuales
     const monthlyLabels = rawData.monthlyAttendance.map(item => {
         const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
         return `${months[item.Mes - 1]} ${item.Anio}`;
     });
     const monthlyValues = rawData.monthlyAttendance.map(item => item.kpi_pct);
 
+    // Procesar datos por fracción
     const fractionLabels = rawData.sessionsByFraction.map(item => item.Fraccion);
     const fractionValues = rawData.sessionsByFraction.map(item => item.total_sesiones);
 
+    // Procesar datos de asistencia por fracción
     const fractions = [...new Set(rawData.attendanceByFraction.map(item => item.Fraccion))];
     const timePeriods = [...new Set(rawData.attendanceByFraction.map(item => item.periodo))].sort();
 
@@ -78,8 +81,8 @@ function processDashboardData(rawData) {
     return {
         globalAttendance: rawData.globalAttendance,
         monthlyAttendance: monthlyValues.length > 0 ? monthlyValues[monthlyValues.length - 1] : 0,
-        topDeputy: { name: topDeputy.Diputado, attendance: topDeputy.pct_asistencia },
-        bottomDeputy: { name: bottomDeputy.Diputado, attendance: bottomDeputy.pct_asistencia },
+        topDeputy: { name: topDeputy.Diputado, attendance: topDeputy.pct_asistencia, fraction: topDeputy.Fraccion },
+        bottomDeputy: { name: bottomDeputy.Diputado, attendance: bottomDeputy.pct_asistencia, fraction: bottomDeputy.Fraccion },
         monthlyTrend: { labels: monthlyLabels, data: monthlyValues },
         sessionsByFraction: { labels: fractionLabels, data: fractionValues, colors: ['#3498db', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6', '#1abc9c', '#d35400'] },
         topDeputies: rawData.topDeputies,
@@ -101,7 +104,7 @@ function processDashboardData(rawData) {
     };
 }
 
-// Show alert function (unchanged)
+// Show alert function
 function showAlert(message, type) {
     const alert = document.createElement('div');
     alert.className = `alert alert-${type} alert-dismissible fade show`;
@@ -162,11 +165,27 @@ async function initializeDashboard() {
             }]
         },
         options: {
+            responsive: true,
             scales: {
-                y: { beginAtZero: false, min: 70, max: 100, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { callback: value => value + '%' } },
-                x: { grid: { color: 'rgba(0, 0, 0, 0.05)' } }
+                y: { 
+                    beginAtZero: false, 
+                    min: 70, 
+                    max: 100, 
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' }, 
+                    ticks: { callback: value => value + '%' } 
+                },
+                x: { 
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' } 
+                }
             },
-            plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: context => context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%' } } }
+            plugins: { 
+                legend: { position: 'top' }, 
+                tooltip: { 
+                    callbacks: { 
+                        label: context => context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%' 
+                    } 
+                } 
+            }
         }
     });
 
@@ -183,8 +202,19 @@ async function initializeDashboard() {
             }]
         },
         options: {
-            scales: { y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' } }, x: { grid: { color: 'rgba(0, 0, 0, 0.05)' } } },
-            plugins: { legend: { display: false } }
+            responsive: true,
+            scales: { 
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' } 
+                }, 
+                x: { 
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' } 
+                } 
+            },
+            plugins: { 
+                legend: { display: false } 
+            }
         }
     });
 
@@ -192,10 +222,32 @@ async function initializeDashboard() {
     const attendanceCtx = document.getElementById('attendance-by-fraction-chart').getContext('2d');
     attendanceByFractionChart = new Chart(attendanceCtx, {
         type: 'line',
-        data: { labels: dashboardData.attendanceByFraction.labels, datasets: dashboardData.attendanceByFraction.datasets },
+        data: { 
+            labels: dashboardData.attendanceByFraction.labels, 
+            datasets: dashboardData.attendanceByFraction.datasets 
+        },
         options: {
-            scales: { y: { beginAtZero: false, min: 70, max: 100, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { callback: value => value + '%' } }, x: { grid: { color: 'rgba(0, 0, 0, 0.05)' } } },
-            plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: context => context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%' } } }
+            responsive: true,
+            scales: { 
+                y: { 
+                    beginAtZero: false, 
+                    min: 70, 
+                    max: 100, 
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' }, 
+                    ticks: { callback: value => value + '%' } 
+                }, 
+                x: { 
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' } 
+                } 
+            },
+            plugins: { 
+                legend: { position: 'top' }, 
+                tooltip: { 
+                    callbacks: { 
+                        label: context => context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%' 
+                    } 
+                } 
+            }
         }
     });
 
@@ -206,16 +258,20 @@ async function initializeDashboard() {
         const attendance = deputy.pct_asistencia;
         const badgeClass = attendance > 95 ? 'excellent' : attendance > 90 ? 'good' : attendance > 85 ? 'warning' : 'critical';
         const progressClass = attendance > 95 ? 'bg-success' : attendance > 90 ? 'bg-primary' : attendance > 85 ? 'bg-warning' : 'bg-danger';
-        const progressWidth = attendance - 60;
+        const progressWidth = attendance;
+        
         topList.innerHTML += `
             <div class="ranking-row">
                 <div class="ranking-position">${index + 1}</div>
                 <div class="flex-grow-1">
-                    <div class="d-flex justify-content-between">
-                        <strong>${deputy.Diputado}</strong>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${deputy.Diputado}</strong>
+                            <small class="text-muted d-block">${deputy.Fraccion}</small>
+                        </div>
                         <span class="kpi-badge ${badgeClass}">${attendance.toFixed(1)}%</span>
                     </div>
-                    <div class="progress">
+                    <div class="progress mt-2">
                         <div class="progress-bar ${progressClass}" style="width: ${progressWidth}%" aria-valuenow="${attendance}" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
@@ -230,16 +286,20 @@ async function initializeDashboard() {
         const attendance = deputy.pct_asistencia;
         const badgeClass = attendance > 85 ? 'excellent' : attendance > 80 ? 'good' : attendance > 75 ? 'warning' : 'critical';
         const progressClass = attendance > 85 ? 'bg-success' : attendance > 80 ? 'bg-primary' : attendance > 75 ? 'bg-warning' : 'bg-danger';
-        const progressWidth = attendance - 60;
+        const progressWidth = attendance;
+        
         bottomList.innerHTML += `
             <div class="ranking-row">
                 <div class="ranking-position">${index + 1}</div>
                 <div class="flex-grow-1">
-                    <div class="d-flex justify-content-between">
-                        <strong>${deputy.Diputado}</strong>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${deputy.Diputado}</strong>
+                            <small class="text-muted d-block">${deputy.Fraccion}</small>
+                        </div>
                         <span class="kpi-badge ${badgeClass}">${attendance.toFixed(1)}%</span>
                     </div>
-                    <div class="progress">
+                    <div class="progress mt-2">
                         <div class="progress-bar ${progressClass}" style="width: ${progressWidth}%" aria-valuenow="${attendance}" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
