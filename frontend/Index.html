@@ -37,93 +37,279 @@
             <button id="refresh-btn" class="btn btn-primary w-100"><i class="fas fa-sync-alt me-2"></i>Actualizar Datos</button>
         </div>
 
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="stat-card h-100">
-                    <div class="card-header">Asistencia Global</div>
-                    <div class="card-body text-center">
-                        <i class="fas fa-users stat-icon"></i>
-                        <div class="stat-value" id="global-attendance">0.0%</div>
-                        <div class="kpi-badge excellent">Excelente</div>
-                        <small>Todos los diputados</small>
+        <!-- Navegación por pestañas -->
+        <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">
+                    <i class="fas fa-chart-pie me-2"></i>Resumen
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="deputies-tab" data-bs-toggle="tab" data-bs-target="#deputies" type="button" role="tab" aria-controls="deputies" aria-selected="false">
+                    <i class="fas fa-users me-2"></i>Diputados
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="fractions-tab" data-bs-toggle="tab" data-bs-target="#fractions" type="button" role="tab" aria-controls="fractions" aria-selected="false">
+                    <i class="fas fa-landmark me-2"></i>Fracciones
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="temporal-tab" data-bs-toggle="tab" data-bs-target="#temporal" type="button" role="tab" aria-controls="temporal" aria-selected="false">
+                    <i class="fas fa-chart-line me-2"></i>Análisis Temporal
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="session-types-tab" data-bs-toggle="tab" data-bs-target="#session-types" type="button" role="tab" aria-controls="session-types" aria-selected="false">
+                    <i class="fas fa-clipboard-list me-2"></i>Tipos de Sesión
+                </button>
+            </li>
+        </ul>
+
+        <!-- Contenido de las pestañas -->
+        <div class="tab-content" id="dashboardTabContent">
+            <!-- Pestaña de Resumen -->
+            <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card h-100">
+                            <div class="card-header">Asistencia Global</div>
+                            <div class="card-body text-center">
+                                <i class="fas fa-users stat-icon"></i>
+                                <div class="stat-value" id="global-attendance">0.0%</div>
+                                <div class="kpi-badge excellent">Excelente</div>
+                                <small>Todos los diputados</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card h-100">
+                            <div class="card-header">Asistencia Mensual</div>
+                            <div class="card-body text-center">
+                                <i class="fas fa-calendar-alt stat-icon"></i>
+                                <div class="stat-value" id="monthly-attendance">0.0%</div>
+                                <div class="kpi-badge good">Buena</div>
+                                <small>Promedio del mes actual</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card h-100">
+                            <div class="card-header">Mejor Diputado</div>
+                            <div class="card-body text-center">
+                                <i class="fas fa-trophy stat-icon"></i>
+                                <div class="stat-value" id="top-deputy-attendance">0.0%</div>
+                                <div class="kpi-badge excellent">Excelente</div>
+                                <small id="top-deputy-name">Cargando...</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="stat-card h-100">
+                            <div class="card-header">Peor Diputado</div>
+                            <div class="card-body text-center">
+                                <i class="fas fa-exclamation-triangle stat-icon"></i>
+                                <div class="stat-value" id="bottom-deputy-attendance">0.0%</div>
+                                <div class="kpi-badge critical">Crítico</div>
+                                <small id="bottom-deputy-name">Cargando...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mt-4">
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-chart-line"></i> Evolución de Asistencia Mensual</div>
+                            <canvas id="monthly-trend-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-chart-bar"></i> Sesiones por Fracción Política</div>
+                            <canvas id="sessions-by-fraction-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mt-4">
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-chart-area"></i> Asistencia por Fracción Política (Evolución Temporal)</div>
+                            <canvas id="attendance-by-fraction-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-trophy"></i> Top 10 Diputados - Mejor Asistencia</div>
+                            <div id="top-deputies-list" class="ranking-container">Cargando datos...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mt-4">
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-exclamation-triangle"></i> Top 10 Diputados - Peor Asistencia</div>
+                            <div id="bottom-deputies-list" class="ranking-container">Cargando datos...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-landmark"></i> Comparación entre Fracciones</div>
+                            <canvas id="fractions-comparison-chart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-3">
-                <div class="stat-card h-100">
-                    <div class="card-header">Asistencia Mensual</div>
-                    <div class="card-body text-center">
-                        <i class="fas fa-calendar-alt stat-icon"></i>
-                        <div class="stat-value" id="monthly-attendance">0.0%</div>
-                        <div class="kpi-badge good">Buena</div>
-                        <small>Promedio del mes actual</small>
+            <!-- Pestaña de Diputados -->
+            <div class="tab-pane fade" id="deputies" role="tabpanel" aria-labelledby="deputies-tab">
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="search-container mb-4">
+                            <div class="input-group">
+                                <input type="text" id="deputy-search" class="form-control" placeholder="Buscar diputado por nombre...">
+                                <button class="btn btn-primary" id="search-deputy-btn">
+                                    <i class="fas fa-search me-2"></i>Buscar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-trophy"></i> Top 20 Diputados - Mejor Asistencia</div>
+                            <canvas id="top-deputies-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-exclamation-triangle"></i> Top 20 Diputados - Peor Asistencia</div>
+                            <canvas id="bottom-deputies-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12" id="deputy-details-container" style="display: none;">
+                        <div class="chart-container">
+                            <div class="chart-title"><i class="fas fa-user"></i> Detalles del Diputado</div>
+                            <div id="deputy-details-content"></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-3">
-                <div class="stat-card h-100">
-                    <div class="card-header">Mejor Diputado</div>
-                    <div class="card-body text-center">
-                        <i class="fas fa-trophy stat-icon"></i>
-                        <div class="stat-value" id="top-deputy-attendance">0.0%</div>
-                        <div class="kpi-badge excellent">Excelente</div>
-                        <small id="top-deputy-name">Cargando...</small>
+            <!-- Pestaña de Fracciones -->
+            <div class="tab-pane fade" id="fractions" role="tabpanel" aria-labelledby="fractions-tab">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-chart-pie"></i> Distribución de Fracciones</div>
+                            <canvas id="fractions-distribution-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-landmark"></i> Asistencia por Fracción</div>
+                            <canvas id="attendance-by-fraction-bar-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <div class="chart-container">
+                            <div class="chart-title"><i class="fas fa-table"></i> Lista de Fracciones</div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="fractions-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Fracción</th>
+                                            <th>Total Diputados</th>
+                                            <th>Total Registros</th>
+                                            <th>Asistencia Promedio</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-3">
-                <div class="stat-card h-100">
-                    <div class="card-header">Peor Diputado</div>
-                    <div class="card-body text-center">
-                        <i class="fas fa-exclamation-triangle stat-icon"></i>
-                        <div class="stat-value" id="bottom-deputy-attendance">0.0%</div>
-                        <div class="kpi-badge critical">Crítico</div>
-                        <small id="bottom-deputy-name">Cargando...</small>
+            <!-- Pestaña de Análisis Temporal -->
+            <div class="tab-pane fade" id="temporal" role="tabpanel" aria-labelledby="temporal-tab">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-chart-line"></i> Evolución Anual de Asistencia</div>
+                            <canvas id="annual-trend-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-calendar-alt"></i> Resumen por Año</div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="annual-summary-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Año</th>
+                                            <th>Asistencia</th>
+                                            <th>Tendencia</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row g-4 mt-4">
-            <div class="col-md-6">
-                <div class="chart-container h-100">
-                    <div class="chart-title"><i class="fas fa-chart-line"></i> Evolución de Asistencia Mensual</div>
-                    <canvas id="monthly-trend-chart"></canvas>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="chart-container h-100">
-                    <div class="chart-title"><i class="fas fa-chart-bar"></i> Sesiones por Fracción Política</div>
-                    <canvas id="sessions-by-fraction-chart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4 mt-4">
-            <div class="col-md-6">
-                <div class="chart-container h-100">
-                    <div class="chart-title"><i class="fas fa-chart-area"></i> Asistencia por Fracción Política (Evolución Temporal)</div>
-                    <canvas id="attendance-by-fraction-chart"></canvas>
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="chart-container h-100">
-                    <div class="chart-title"><i class="fas fa-trophy"></i> Top 10 Diputados - Mejor Asistencia</div>
-                    <div id="top-deputies-list" class="ranking-container">Cargando datos...</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4 mt-4">
-            <div class="col-md-6">
-                <div class="chart-container h-100">
-                    <div class="chart-title"><i class="fas fa-exclamation-triangle"></i> Top 10 Diputados - Peor Asistencia</div>
-                    <div id="bottom-deputies-list" class="ranking-container">Cargando datos...</div>
+            <!-- Pestaña de Tipos de Sesión -->
+            <div class="tab-pane fade" id="session-types" role="tabpanel" aria-labelledby="session-types-tab">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-chart-pie"></i> Asistencia por Tipo de Sesión</div>
+                            <canvas id="session-types-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="chart-container h-100">
+                            <div class="chart-title"><i class="fas fa-chart-bar"></i> Comparación de Tipos de Sesión</div>
+                            <canvas id="session-types-bar-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <div class="chart-container">
+                            <div class="chart-title"><i class="fas fa-table"></i> Detalles por Tipo de Sesión</div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="session-types-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo de Sesión</th>
+                                            <th>Asistencias</th>
+                                            <th>Ausencias</th>
+                                            <th>Total</th>
+                                            <th>Porcentaje</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
